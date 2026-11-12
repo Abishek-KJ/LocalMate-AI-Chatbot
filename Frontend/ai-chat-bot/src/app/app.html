@@ -1,0 +1,34 @@
+<div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <aside class="sidebar">
+    <header class="sidebar-header"><span class="brand">LocalMate</span><div class="header-actions"><button (click)="toggleSidebar()" class="icon-button collapse-button" [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 4v16"/></svg></button></div></header>
+    <nav class="main-nav">
+      <button (click)="newChat()" class="nav-item selected"><svg viewBox="0 0 24 24"><path d="M14.5 4.5 19.5 9.5M13.5 5.5l-8 8-.9 4.9 4.9-.9 8-8a2.8 2.8 0 0 0-4-4Z"/></svg><span>New chat</span></button>
+    </nav>
+    <section class="previous-chats">
+      <h2>Previous chats</h2>
+      @if (chats().length) {
+        <div class="chat-list">
+          @for (chat of chats(); track chat.id) {
+            <button (click)="openChat(chat)" class="saved-chat" [class.active]="activeChatId() === chat.id" [title]="chat.title"><svg viewBox="0 0 24 24"><path d="M5 18.5 3.8 21l3.1-1.1A8 8 0 1 0 4 17.2"/><path d="M8 12h8M8 8.5h5"/></svg><span>{{ chat.title }}</span></button>
+          }
+        </div>
+      } @else { <p class="empty-chats">Your conversations will appear here.</p> }
+    </section>
+    <footer class="profile"><div class="avatar">U</div><div class="profile-text"><strong>User</strong><span>Free</span></div><button class="upgrade-small">Upgrade</button></footer>
+  </aside>
+
+  <main class="chat-area">
+    <header class="topbar"><div class="mode-switch"><button class="active">Chat</button><button class="work">✦ Local Plus</button></div><div class="top-actions"><button class="upgrade">✦ Upgrade</button></div></header>
+    <section class="welcome" [class.chatting]="conversation().length">
+      @if (!conversation().length) { <h1>Where should we begin?</h1> }
+      @if (conversation().length) {
+        <div class="conversation" aria-live="polite">
+          @for (item of conversation(); track $index) { <div class="message" [class.assistant]="item.role === 'assistant'"><span [innerHTML]="item.role === 'assistant' ? (item.text | markdown) : item.text"></span>@if (isLoading() && $last && !item.text) { <span class="typing">● ● ●</span> }</div> }
+          @if (error()) { <div class="chat-error">{{ error() }}</div> }
+        </div>
+      }
+      <div class="composer"><button class="add" aria-label="Add attachment">+</button><textarea [(ngModel)]="prompt" (keydown.enter)="handleEnter($event)" [disabled]="isLoading()" aria-label="Ask LocalMate" placeholder="Ask LocalMate"></textarea><div class="composer-tools"><button (click)="sendMessage()" class="voice" aria-label="Send message"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></div></div>
+      @if (!conversation().length) { <div class="suggestions">@for (suggestion of suggestions; track suggestion) { <button (click)="sendMessage(suggestion)"><span>✧</span>{{ suggestion }}</button> }</div> }
+    </section>
+  </main>
+</div>
